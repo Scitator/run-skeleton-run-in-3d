@@ -1,0 +1,11 @@
+catalyst[rl]==19.11.5
+
+redis
+pymongo
+pyarrow==0.15.0
+lz4==2.1.10
+gym>=0.13.0
+
+flake8
+flake8-quotes
+yapf

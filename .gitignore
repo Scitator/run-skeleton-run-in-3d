@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Pycharm stuff
+.idea/
+.DS_Store
+./mongodb/*
+./assets/*
+./wandb/*
+*.bak
+

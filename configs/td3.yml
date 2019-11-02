@@ -1,0 +1,21 @@
+args:
+  logdir: ./logs/l2m-td3  #  change me
+
+db:
+  port: 12000
+  prefix: td3
+
+#monitoring_params:
+#  group: 190920-rl1-td3-osim
+
+agents:
+  actor:
+    policy_head_params:  # hidden representation -> ~policy
+      policy_type: null
+      out_activation: Tanh
+
+algorithm:
+  algorithm: TD3
+
+  action_noise_std: 0.15
+  action_noise_clip: 0.5

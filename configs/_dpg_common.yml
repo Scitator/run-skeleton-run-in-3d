@@ -1,0 +1,164 @@
+db:
+  db: RedisDB  # RedisDB or MongoDB
+#  port: 12000
+#  prefix: dqn-***  # TODO: remove
+
+
+environment:
+  history_len: &history_len 1
+
+
+agents:
+  actor:
+    agent: Actor
+
+    state_net_params:  # state -> hidden representation
+#      observation_net_params:
+#        _network_type: "linear"
+#        history_len: 1
+##        history_len: *history_len
+#        features: [128]
+#        use_bias: true
+##        normalization: LayerNorm
+##        dropout_rate: 0.1
+#        activation: ReLU
+#      aggregation_net_params:
+#        _network_type: concat
+#        history_len: *history_len
+      main_net_params:
+        features: [512, 256, 256]
+        use_bias: [true, false, false]
+        normalization: LayerNorm
+        dropout_rate: null
+        activation: ReLU
+        residual: "soft"
+    policy_head_params:  # hidden representation -> ~policy
+      in_features: 256
+      # out features would be taken from action_shape
+
+  critic:
+    agent: StateActionCritic
+
+    state_action_net_params:  # state -> hidden representation
+#      observation_net_params:
+#        _network_type: "linear"
+#        history_len: 1
+##        history_len: *history_len
+#        features: [128]
+#        use_bias: true
+##        normalization: LayerNorm
+##        dropout_rate: 0.1
+#        activation: ReLU
+#      aggregation_net_params:
+#        _network_type: concat
+#        history_len: *history_len
+      main_net_params:
+        features: [512, 256, 256]
+        use_bias: [true, false, false]
+        normalization: LayerNorm
+        dropout_rate: null
+        activation: ReLU
+        residual: "soft"
+    value_head_params:  # hidden representation -> value
+      in_features: 256
+#      out_features: 1
+
+      num_heads: 10
+      hyperbolic_constant: 0.01
+
+#      distribution: categorical
+#      num_atoms: 101
+#      values_range: [-10.0, 10.0]
+
+      distribution: quantile
+      num_atoms: 101
+
+
+algorithm:
+#  algorithm: DDPG
+
+  n_step: 1
+  gamma: 0.99
+  actor_tau: 0.008
+  critic_tau: 0.008
+  action_boundaries: [-1.0, 1.0]
+
+  critic_loss_params:
+    criterion: HuberLoss
+    clip_delta: 1.0
+
+  actor_optimizer_params:
+    optimizer: Adam
+    lr: 0.001
+  critic_optimizer_params:
+    optimizer: Adam
+    lr: 0.001
+
+  actor_scheduler_params:
+    scheduler: MultiStepLR
+    milestones: [2000000, 4000000]  # batches, ~2000 epochs
+    gamma: 0.3
+  critic_scheduler_params:
+    scheduler: MultiStepLR
+    milestones: [2000000, 4000000]  # batches, ~2000 epochs
+    gamma: 0.3
+
+#  actor_grad_clip_params:
+#    func: clip_grad_norm_
+#    max_norm: 1.0
+#  critic_grad_clip_params:
+#    func: clip_grad_norm_
+#    max_norm: 1.0
+  actor_grad_clip_params:
+    func: clip_grad_value_
+    clip_value: 1.0
+#  critic_grad_clip_params:
+#    func: clip_grad_value_
+#    clip_value: 5.0
+
+
+trainer:
+  batch_size: 256               # transitions
+  num_workers: 2
+  epoch_len: 400                # batches, 400*256 = ~100k/128k
+
+  replay_buffer_size: 10000000   # transitions
+  replay_buffer_mode: numpy    # numpy or memmap
+  min_num_transitions: &min_num_transitions 8000     # transitions
+
+#  cem_reward_threshold: 80
+#  cem_minimal_capacity: 500000
+
+  save_period: 50               # epochs
+  weights_sync_period: 1        # epochs
+  target_update_period: 1       # batches, update each 64k samples
+  online_update_period: 1       # batches, [actor, critic]
+
+  epoch_limit: 50000
+#  max_updates_per_sample: 128
+  min_transitions_per_epoch: 1000
+
+
+sampler:
+  exploration_params:
+    - exploration: GaussNoise
+      probability: 0.7
+      sigma: 0.3
+
+#    - exploration: OrnsteinUhlenbeckProcess
+#      probability: 0.3
+#      sigma: 0.3
+#      theta: 0.15
+
+    - exploration: ParameterSpaceNoise
+      probability: 0.2
+      target_sigma: 0.2
+
+#    - exploration: ContinuousActionBinarization
+#      probability: 0.1
+#      threshold: 0.0
+#      upper: 0.95
+#      lower: -0.95
+
+    - exploration: NoExploration
+      probability: 0.1

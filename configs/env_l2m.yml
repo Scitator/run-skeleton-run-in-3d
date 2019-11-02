@@ -1,0 +1,83 @@
+#monitoring_params:
+#  project: rl-19-l2m
+#  group: td3-n1-190903-legion
+
+
+environment:
+  environment: SkeletonEnvWrapper
+  frame_skip: 4
+  reward_scale: 1.0
+  step_reward: 0
+
+  action_mean: 0.5
+  action_std: 0.5
+
+  reload_period: 10
+  difficulty_probabilities: null
+
+#  min_episode_steps: 2000
+#  min_episode_raw_reward: 500
+#  hard_seed_probability: 0.5
+#  hard_seed_initial_episode: 2000
+
+  environment_params:
+    difficulty: 3
+    integrator_accuracy: 0.0005
+
+    timestep_limit: 2500
+    reward_shaping_weights:
+      effort: 0.0
+      v_tgt_vector: 0.3    # ~750 reward for 2500 steps
+      v_tgt_direction: 0.0
+      v_tgt_velocity: 0.0
+      v_tgt_position: 0.0
+      v_tgt_position_delta: 0.0
+      new_v_tgt_field_bonus: 0.0   # for 400 steps
+      min_sink_distance: 5
+      max_sink_distance: 7
+      min_time_near_sink: 2.0      # 1.0 == 100 steps
+      max_time_near_sink: 4.0
+      n_new_target: 2
+      new_target_end: false
+#      speed_threshold: 2.0
+      distance_threshold: 0.3
+      step_reward: 5.0  # ~50-250 reward for 2500 steps -> 250-750
+
+  wrapper_params:
+    # initial position
+    random_start_probability: 0.5
+    random_pose_probability: -1
+    random_pose_scale: null
+
+    # features space
+    use_time_feature: true
+
+    vector_field_mode: "central_crop"
+    crop_size: 0  # min - 0, max - 5
+    vector_field_normalization: false
+
+    features_normalization: false
+#    features_normalization: "./assets/osim_observations_normalization"
+    features_mode: "all"  # all/reflex/osim
+    use_extra_vector_field_features: false
+
+    # reward shaping
+    step_reward: 0.0  # do not mix with reward scale, do not use
+    pelvis_height_penalty: 0.0
+    crossing_legs_penalty: 0.0
+    bending_knees_bonus: 0.0
+    left_knee_bonus: 0.0
+    right_knee_bonus: 0.0
+    bonus_for_knee_angles_scale: 0.0
+    bonus_for_knee_angles_angle: 0.0
+    activations_penalty: 0.0
+
+    # gym wrappers
+    use_flatten_wrapper: true
+    return_flatten_dict: false
+
+#  vector_field_normalization: false  # check
+#  features_normalization: false      # check
+
+#  vector_field_normalization: "./assets/vector_field_norm"
+#  features_normalization: "./assets/features_norm"
