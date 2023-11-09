@@ -2,7 +2,7 @@ catalyst[rl]==19.11.5
 
 redis
 pymongo
-pyarrow==0.15.0
+pyarrow==14.0.1
 lz4==2.1.10
 gym>=0.13.0
 
